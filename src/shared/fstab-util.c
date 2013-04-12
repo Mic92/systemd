@@ -40,6 +40,8 @@ bool fstab_is_extrinsic(const char *mount, const char *opts) {
         /* Don't bother with the OS data itself */
         if (PATH_IN_SET(mount,
                         "/",
+                        "/nix",
+                        "/nix/store",
                         "/usr",
                         "/etc"))
                 return true;

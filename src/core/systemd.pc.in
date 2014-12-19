@@ -38,10 +38,11 @@ systemdsystemconfdir=${systemd_system_conf_dir}
 systemd_user_conf_dir=${sysconfdir}/systemd/user
 systemduserconfdir=${systemd_user_conf_dir}
 
-systemd_system_unit_path=${systemd_system_conf_dir}:/etc/systemd/system:/run/systemd/system:/usr/local/lib/systemd/system:${systemd_system_unit_dir}:/usr/lib/systemd/system:/lib/systemd/system
+systemd_system_unit_path=${systemd_system_conf_dir}:/etc/systemd/system:/nix/var/nix/profiles/default/lib/systemd/system:/run/systemd/system:${systemdsystemunitdir}
 systemdsystemunitpath=${systemd_system_unit_path}
 
-systemd_user_unit_path=${systemd_user_conf_dir}:/etc/systemd/user:/run/systemd/user:/usr/local/lib/systemd/user:/usr/local/share/systemd/user:${systemd_user_unit_dir}:/usr/lib/systemd/user:/usr/share/systemd/user
+systemd_user_unit_path=${systemd_user_conf_dir}:/etc/systemd/user:/nix/var/nix/profiles/default/lib/systemd/user:/run/systemd/user:${systemduserunitdir}
+
 systemduserunitpath=${systemd_user_unit_path}
 
 systemd_system_generator_dir=${root_prefix}/lib/systemd/system-generators

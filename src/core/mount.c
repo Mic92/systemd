@@ -418,7 +418,9 @@ static bool mount_is_extrinsic(Mount *m) {
 
         if (PATH_IN_SET(m->where,  /* Don't bother with the OS data itself */
                         "/",
-                        "/usr"))
+                        "/usr",
+                        "/nix/",
+                        "/nix/store"))
                 return true;
 
         if (PATH_STARTSWITH_SET(m->where,
@@ -446,10 +448,20 @@ static int mount_add_default_dependencies(Mount *m) {
         if (!UNIT(m)->default_dependencies)
                 return 0;
 
-        /* We do not add any default dependencies to /, /usr or /run/initramfs/, since they are guaranteed to stay
-         * mounted the whole time, since our system is on it.  Also, don't bother with anything mounted below virtual
-         * file systems, it's also going to be virtual, and hence not worth the effort. */
-        if (mount_is_extrinsic(m))
+        if (!MANAGER_IS_SYSTEM(UNIT(m)->manager))
+                return 0;
+
+        /* We do not add any default dependencies to /, /usr or
+         * /run/initramfs/, since they are guaranteed to stay
+         * mounted the whole time, since our system is on it.
+         * Also, don't bother with anything mounted below virtual
+         * file systems, it's also going to be virtual, and hence
+         * not worth the effort. */
+        if (PATH_IN_SET(m->where, "/", "/usr", "/nix", "/nix/store") ||
+            path_startswith(m->where, "/run/initramfs") ||
+            path_startswith(m->where, "/proc") ||
+            path_startswith(m->where, "/sys") ||
+            path_startswith(m->where, "/dev"))
                 return 0;
 
         p = get_mount_parameters(m);

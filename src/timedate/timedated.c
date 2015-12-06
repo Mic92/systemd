@@ -646,6 +646,10 @@ static int method_set_timezone(sd_bus_message *m, void *userdata, sd_bus_error *
         if (r < 0)
                 return r;
 
+        if (getenv("NIXOS_STATIC_TIMEZONE"))
+                return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+                    "Changing timezone via systemd is not supported when it is set in NixOS configuration.");
+
         if (!timezone_is_valid(z, LOG_DEBUG))
                 return sd_bus_error_setf(error, SD_BUS_ERROR_INVALID_ARGS, "Invalid or not installed time zone '%s'", z);
 
@@ -724,6 +728,9 @@ static int method_set_local_rtc(sd_bus_message *m, void *userdata, sd_bus_error 
         r = sd_bus_message_read(m, "bbb", &lrtc, &fix_system, &interactive);
         if (r < 0)
                 return r;
+
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
 
         if (lrtc == c->local_rtc && !fix_system)
                 return sd_bus_reply_method_return(m, NULL);
@@ -906,6 +913,9 @@ static int method_set_ntp(sd_bus_message *m, void *userdata, sd_bus_error *error
         r = sd_bus_message_read(m, "bb", &enable, &interactive);
         if (r < 0)
                 return r;
+
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
 
         r = context_update_ntp_status(c, bus, m);
         if (r < 0)

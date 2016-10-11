@@ -1275,7 +1275,7 @@ int get_timezones(char ***ret) {
         n_allocated = 2;
         n_zones = 1;
 
-        f = fopen("/usr/share/zoneinfo/zone1970.tab", "re");
+        f = fopen("/etc/zoneinfo/zone1970.tab", "re");
         if (f) {
                 for (;;) {
                         _cleanup_free_ char *line = NULL;
@@ -1370,7 +1370,7 @@ bool timezone_is_valid(const char *name, int log_level) {
         if (p - name >= PATH_MAX)
                 return false;
 
-        t = strjoina("/usr/share/zoneinfo/", name);
+        t = strjoina("/etc/zoneinfo/", name);
 
         fd = open(t, O_RDONLY|O_CLOEXEC);
         if (fd < 0) {
@@ -1468,7 +1468,7 @@ int get_timezone(char **ret) {
         if (r < 0)
                 return r; /* returns EINVAL if not a symlink */
 
-        e = PATH_STARTSWITH_SET(t, "/usr/share/zoneinfo/", "../usr/share/zoneinfo/");
+        e = PATH_STARTSWITH_SET(t, "/etc/zoneinfo/", "../etc/zoneinfo/");
         if (!e)
                 return -EINVAL;
 

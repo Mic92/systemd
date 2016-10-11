@@ -1831,8 +1831,8 @@ static int userns_mkdir(const char *root, const char *path, mode_t mode, uid_t u
 static const char *timezone_from_path(const char *path) {
         return PATH_STARTSWITH_SET(
                         path,
-                        "../usr/share/zoneinfo/",
-                        "/usr/share/zoneinfo/");
+                        "../etc/zoneinfo/",
+                        "/etc/zoneinfo/");
 }
 
 static bool etc_writable(void) {

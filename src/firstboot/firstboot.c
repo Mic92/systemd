@@ -456,7 +456,7 @@ static int process_timezone(void) {
         if (isempty(arg_timezone))
                 return 0;
 
-        e = strjoina("../usr/share/zoneinfo/", arg_timezone);
+        e = strjoina("zoneinfo/", arg_timezone);
 
         (void) mkdir_parents(etc_localtime, 0755);
         if (symlink(e, etc_localtime) < 0)

@@ -20,6 +20,7 @@
 ***/
 
 #include "macro.h"
+#include "in-addr-util.h"
 
 typedef enum AddressFamilyBoolean {
         /* This is a bitmask, though it usually doesn't feel that way! */
@@ -33,6 +34,9 @@ typedef enum AddressFamilyBoolean {
 
 int config_parse_address_family_boolean(const char *unit, const char *filename, unsigned line, const char *section, unsigned section_line, const char *lvalue, int ltype, const char *rvalue, void *data, void *userdata);
 int config_parse_address_family_boolean_with_kernel(const char* unit, const char *filename, unsigned line, const char *section, unsigned section_line, const char *lvalue, int ltype, const char *rvalue, void *data, void *userdata);
+
+int ip_port_from_string(const char* s, uint16_t *port);
+int parse_address_and_prefixlen(const char *s, int *family, union in_addr_union *addr, unsigned char *prefixlen);
 
 const char *address_family_boolean_to_string(AddressFamilyBoolean b) _const_;
 AddressFamilyBoolean address_family_boolean_from_string(const char *s) _const_;

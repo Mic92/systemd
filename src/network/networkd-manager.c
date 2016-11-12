@@ -1074,6 +1074,14 @@ int manager_new(Manager **ret, sd_event *event) {
 
         LIST_HEAD_INIT(m->networks);
 
+        r = sd_resolve_default(&m->resolve);
+        if (r < 0)
+                return r;
+
+        r = sd_resolve_attach_event(m->resolve, m->event, 0);
+        if (r < 0)
+                return r;
+
         r = setup_default_address_pool(m);
         if (r < 0)
                 return r;

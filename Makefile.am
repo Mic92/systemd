@@ -5707,6 +5707,9 @@ libnetworkd_core_la_SOURCES = \
 	src/network/netdev/bridge.c \
 	src/network/netdev/vcan.h \
 	src/network/netdev/vcan.c \
+	src/network/netdev/wireguard.h \
+	src/network/netdev/wireguard.c \
+	src/network/netdev/wireguard-ioctl.h \
 	src/network/networkd-manager.h \
 	src/network/networkd-manager.c \
 	src/network/networkd-manager-bus.c \

@@ -99,3 +99,48 @@ int config_parse_address_family_boolean_with_kernel(
 
         return 0;
 }
+
+int ip_port_from_string(const char *s, uint16_t *port) {
+        int r;
+        uint16_t p;
+
+        assert(s);
+        assert(port);
+
+        r = safe_atou16(s, &p);
+        if (r < 0 || p == 0)
+                return r;
+        *port = p;
+        return 0;
+}
+
+int parse_address_and_prefixlen(const char *s, int *family, union in_addr_union *addr, unsigned char *prefixlen) {
+        const char *address, *end;
+        int r;
+        unsigned char p;
+
+        assert(s);
+        assert(prefixlen);
+
+        end = strchr(s, '/');
+        if (end)
+                address = strndupa(s, end - s);
+        else
+                address = s;
+
+        r = in_addr_from_string_auto(address, family, addr);
+        if (r < 0)
+                return r;
+
+        if (end) {
+                r = safe_atou8(end + 1, &p);
+                if (r < 0 ||
+                    (*family == AF_INET && p > 32) ||
+                    (*family == AF_INET6 && p > 128))
+                        return r;
+                *prefixlen = p;
+
+        } else
+                *prefixlen = *family == AF_INET ? 32 : 128;
+        return 0;
+}

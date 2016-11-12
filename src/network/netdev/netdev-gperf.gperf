@@ -13,6 +13,7 @@
 #include "netdev/vlan.h"
 #include "netdev/vxlan.h"
 #include "netdev/vrf.h"
+#include "netdev/wireguard.h"
 #include "netdev/netdev.h"
 #include "vlan-util.h"
 %}
@@ -134,3 +135,11 @@ Bridge.MulticastSnooping,    config_parse_tristate,                0,           
 Bridge.VLANFiltering,        config_parse_tristate,                0,                             offsetof(Bridge, vlan_filtering)
 Bridge.STP,                  config_parse_tristate,                0,                             offsetof(Bridge, stp)
 VRF.TableId,                 config_parse_uint32,                  0,                             offsetof(Vrf, table_id)
+Wireguard.FwMark,                  config_parse_unsigned,                 0,                             offsetof(Wireguard, dev.fwmark)
+Wireguard.ListenPort,              config_parse_wireguard_listen_port,    0,                             0
+Wireguard.PrivateKey,              config_parse_wireguard_private_key,    0,                             0
+WireguardPeer.AllowedIPs,          config_parse_wireguard_allowed_ips,    0,                             0
+WireguardPeer.Endpoint,            config_parse_wireguard_endpoint,       0,                             0
+WireguardPeer.PublicKey,           config_parse_wireguard_public_key,     0,                             0
+WireguardPeer.PresharedKey,        config_parse_wireguard_preshared_key,  0,                             0
+WireguardPeer.PersistentKeepalive, config_parse_wireguard_keepalive,      0,                             0

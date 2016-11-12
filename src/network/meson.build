@@ -25,6 +25,9 @@ sources = files('''
         netdev/vrf.h
         netdev/vxlan.c
         netdev/vxlan.h
+        netdev/wireguard.c
+        netdev/wireguard.h
+        netdev/wireguard-ioctl.h
         netdev/geneve.c
         netdev/geneve.h
         networkd-address-label.c

@@ -120,34 +120,76 @@ static void endpoint_free(WireguardEndpoint *e) {
 
 DEFINE_TRIVIAL_CLEANUP_FUNC(WireguardEndpoint*, endpoint_free);
 
+static int on_resolve_retry(sd_event_source *s, usec_t usec, void *userdata) {
+        NetDev *netdev = userdata;
+        Wireguard *w;
+
+        assert(netdev);
+        w = WIREGUARD(netdev);
+        assert(w);
+
+        w->resolve_retry_event_source = sd_event_source_unref(w->resolve_retry_event_source);
+
+        w->unresolved_endpoints = w->failed_endpoints;
+        w->n_unresolved_endpoints = w->n_failed_endpoints;
+        w->failed_endpoints = NULL;
+        w->n_failed_endpoints = 0;
+
+        resolve_endpoints(netdev);
+
+        return 0;
+}
+
 static int wireguard_resolve_handler(sd_resolve_query *q,
                                      int ret,
                                      const struct addrinfo *ai,
                                      void *userdata) {
+        NetDev *netdev;
         Wireguard *w;
         _cleanup_(endpoint_freep) WireguardEndpoint *e;
+        int r;
 
         assert(userdata);
         e = userdata;
+        netdev = e->netdev;
 
-        assert(e->netdev);
-        w = WIREGUARD(e->netdev);
+        assert(netdev);
+        w = WIREGUARD(netdev);
         assert(w);
 
-        if (ret != 0)
-                log_netdev_error(e->netdev, "Failed to resolve host '%s:%s': %s", e->host, e->port, gai_strerror(ret));
-        else if ((ai->ai_family == AF_INET && ai->ai_addrlen == sizeof(struct sockaddr_in)) ||
+        if (ret != 0) {
+                log_netdev_error(netdev, "Failed to resolve host '%s:%s': %s", e->host, e->port, gai_strerror(ret));
+                if (ret != EAI_NODATA && ret != EAI_NONAME) {
+                       LIST_PREPEND(endpoints, w->failed_endpoints, e);
+                       w->n_failed_endpoints++;
+                       e = NULL;
+                }
+        } else if ((ai->ai_family == AF_INET && ai->ai_addrlen == sizeof(struct sockaddr_in)) ||
                         (ai->ai_family == AF_INET6 && ai->ai_addrlen == sizeof(struct sockaddr_in6)))
                 memcpy(&e->peer->fields.endpoint, ai->ai_addr, ai->ai_addrlen);
         else
-                log_netdev_error(e->netdev, "Neither IPv4 nor IPv6 address found for peer endpoint: %s:%s", e->host, e->port);
+                log_netdev_error(netdev, "Neither IPv4 nor IPv6 address found for peer endpoint: %s:%s", e->host, e->port);
 
         w->n_unresolved_endpoints--;
 
         if (w->n_unresolved_endpoints && w->n_unresolved_endpoints % MAX_CONCURRENT_QUERIES == 0)
-                resolve_endpoints(e->netdev);
-        else if (!w->n_unresolved_endpoints)
-                update_wireguard_config(e->netdev);
+                resolve_endpoints(netdev);
+        else if (!w->n_unresolved_endpoints) {
+                update_wireguard_config(netdev);
+                if (w->failed_endpoints) {
+                        w->retries++;
+                        r = sd_event_add_time(netdev->manager->event,
+                                              &w->resolve_retry_event_source,
+                                              CLOCK_MONOTONIC,
+                                              /* cap at ~25s */
+                                              now(CLOCK_MONOTONIC) + (2 << MAX(w->retries, (unsigned)7)) * 100 * USEC_PER_MSEC,
+                                              0,
+                                              on_resolve_retry,
+                                              netdev);
+                        if (r < 0)
+                                log_netdev_warning_errno(netdev, r, "Could not arm resolve retry handler: %m");
+                }
+        }
 
         return 0;
 }
@@ -556,7 +598,8 @@ static void wireguard_done(NetDev *netdev) {
         assert(netdev);
 
         w = WIREGUARD(netdev);
-        sd_resolve_query_unref(w->resolve_query);
+        w->resolve_query = sd_resolve_query_unref(w->resolve_query);
+        w->resolve_retry_event_source = sd_event_source_unref(w->resolve_retry_event_source);
 
         LIST_FOREACH(endpoints, endpoint, w->unresolved_endpoints) {
                 w->n_unresolved_endpoints--;

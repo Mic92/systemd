@@ -531,9 +531,6 @@ static int method_set_time(sd_bus_message *m, void *userdata, sd_bus_error *erro
         assert(m);
         assert(c);
 
-        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
-            "Changing system settings via systemd is not supported on NixOS.");
-
         if (c->use_ntp)
                 return sd_bus_error_setf(error, BUS_ERROR_AUTOMATIC_TIME_SYNC_ENABLED, "Automatic time synchronization is enabled");
 

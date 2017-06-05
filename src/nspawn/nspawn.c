@@ -2188,7 +2188,7 @@ static int inner_child(
         if (r < 0)
                 return r;
 
-        r = mount_sysfs(NULL, arg_mount_settings);
+        r = mount_sysfs(arg_mount_settings);
         if (r < 0)
                 return r;
 

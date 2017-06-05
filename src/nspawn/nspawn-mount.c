@@ -398,15 +398,14 @@ static int tmpfs_patch_options(
         return !!buf;
 }
 
-int mount_sysfs(const char *dest, MountSettingsMask mount_settings) {
-        const char *full, *top, *x;
+int mount_sysfs(MountSettingsMask mount_settings) {
+        const char *x;
         int r;
         unsigned long extra_flags = 0;
 
-        top = prefix_roota(dest, "/sys");
-        r = path_check_fstype(top, SYSFS_MAGIC);
+        r = path_check_fstype("/sys", SYSFS_MAGIC);
         if (r < 0)
-                return log_error_errno(r, "Failed to determine filesystem type of %s: %m", top);
+                return log_error_errno(r, "Failed to determine filesystem type of /sys: %m");
         /* /sys might already be mounted as sysfs by the outer child in the
          * !netns case. In this case, it's all good. Don't touch it because we
          * don't have the right to do so, see https://github.com/systemd/systemd/issues/1555.
@@ -414,14 +413,12 @@ int mount_sysfs(const char *dest, MountSettingsMask mount_settings) {
         if (r > 0)
                 return 0;
 
-        full = prefix_roota(top, "/full");
-
-        (void) mkdir(full, 0755);
+        (void) mkdir("/sys/full", 0755);
 
         if (mount_settings & MOUNT_APPLY_APIVFS_RO)
                 extra_flags |= MS_RDONLY;
 
-        r = mount_verbose(LOG_ERR, "sysfs", full, "sysfs",
+        r = mount_verbose(LOG_ERR, "sysfs", "/sys/full", "sysfs",
                           MS_NOSUID|MS_NOEXEC|MS_NODEV|extra_flags, NULL);
         if (r < 0)
                 return r;
@@ -429,11 +426,11 @@ int mount_sysfs(const char *dest, MountSettingsMask mount_settings) {
         FOREACH_STRING(x, "block", "bus", "class", "dev", "devices", "kernel") {
                 _cleanup_free_ char *from = NULL, *to = NULL;
 
-                from = prefix_root(full, x);
+                from = prefix_root("/sys/full", x);
                 if (!from)
                         return log_oom();
 
-                to = prefix_root(top, x);
+                to = prefix_root("/sys", x);
                 if (!to)
                         return log_oom();
 
@@ -449,25 +446,23 @@ int mount_sysfs(const char *dest, MountSettingsMask mount_settings) {
                         return r;
         }
 
-        r = umount_verbose(full);
+        r = umount_verbose("/sys/full");
         if (r < 0)
                 return r;
 
-        if (rmdir(full) < 0)
-                return log_error_errno(errno, "Failed to remove %s: %m", full);
+        if (rmdir("/sys/full") < 0)
+                return log_error_errno(errno, "Failed to remove /sys/full: %m");
 
-        x = prefix_roota(top, "/fs/kdbus");
-        (void) mkdir_p(x, 0755);
+        (void) mkdir_p("/sys/fs/kdbus", 0755);
 
         /* Create mountpoint for cgroups. Otherwise we are not allowed since we
          * remount /sys read-only.
          */
         if (cg_ns_supported()) {
-                x = prefix_roota(top, "/fs/cgroup");
-                (void) mkdir_p(x, 0755);
+                (void) mkdir_p("/sys/fs/cgroup", 0755);
         }
 
-        return mount_verbose(LOG_ERR, NULL, top, NULL,
+        return mount_verbose(LOG_ERR, NULL, "/sys", NULL,
                              MS_BIND|MS_NOSUID|MS_NOEXEC|MS_NODEV|MS_REMOUNT|extra_flags, NULL);
 }
 

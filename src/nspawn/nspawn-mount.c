@@ -453,7 +453,7 @@ int mount_sysfs(MountSettingsMask mount_settings) {
         if (rmdir("/sys/full") < 0)
                 return log_error_errno(errno, "Failed to remove /sys/full: %m");
 
-        (void) mkdir_p("/sys/fs/kdbus", 0755);
+        /*(void) mkdir_p("/sys/fs/kdbus", 0755);*/
 
         /* Create mountpoint for cgroups. Otherwise we are not allowed since we
          * remount /sys read-only.

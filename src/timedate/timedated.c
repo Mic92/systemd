@@ -365,8 +365,9 @@ static int method_set_timezone(sd_bus_message *m, void *userdata, sd_bus_error *
         if (r < 0)
                 return r;
 
-        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
-            "Changing system settings via systemd is not supported on NixOS.");
+        if (getenv("NIXOS_STATIC_TIMEZONE"))
+                return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+                    "Changing timezone via systemd is not supported when it is set in NixOS configuration.");
 
         if (!timezone_is_valid(z))
                 return sd_bus_error_setf(error, SD_BUS_ERROR_INVALID_ARGS, "Invalid time zone '%s'", z);

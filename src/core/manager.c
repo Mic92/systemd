@@ -4126,10 +4126,15 @@ static int manager_run_generators(Manager *m) {
         argv[4] = NULL;
 
         RUN_WITH_UMASK(0022)
-                (void) execute_directories((const char* const*) paths, DEFAULT_TIMEOUT_USEC, NULL, NULL,
-                                           (char**) argv, m->transient_environment,
-                                           EXEC_DIR_PARALLEL | EXEC_DIR_IGNORE_ERRORS | EXEC_DIR_SET_SYSTEMD_EXEC_PID);
-
+                (void) execute_directories((const char* const*) paths, DEFAULT_TIMEOUT_USEC,
+                                    // On NixOS we must propagate PATH to generators so they are
+                                    // able to find binaries such as `fsck.${fstype}` and
+                                    // `mkfs.${fstype}`. That is why the last argument of the
+                                    // function (envp) is set to NULL. This propagates systemd's
+                                    // environment (e.g. PATH) that was setup
+                                    // before calling systemd from stage-2-init.sh.
+                                    NULL, NULL, (char**) argv, /* NixOS: use inherited env */ NULL,
+                                    EXEC_DIR_PARALLEL | EXEC_DIR_IGNORE_ERRORS | EXEC_DIR_SET_SYSTEMD_EXEC_PID);
         r = 0;
 
 finish:

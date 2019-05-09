@@ -39,13 +39,15 @@
         "/run/" n "\0"                          \
         "/usr/local/lib/" n "\0"                \
         "/usr/lib/" n "\0"                      \
-        _CONF_PATHS_SPLIT_USR_NULSTR(n)
+        _CONF_PATHS_SPLIT_USR_NULSTR(n)         \
+        ROOTPREFIX "/lib/" n "\0"
 
 #define CONF_PATHS_USR(n)                       \
         "/etc/" n,                              \
         "/run/" n,                              \
         "/usr/local/lib/" n,                    \
-        "/usr/lib/" n
+        "/usr/lib/" n,                          \
+        ROOTPREFIX "/lib/" n
 
 #define CONF_PATHS(n)                           \
         CONF_PATHS_USR(n)                       \

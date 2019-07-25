@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
         _cleanup_free_ char *cgroup = NULL;
         char *arguments[3], *watchdog_device;
         int cmd, r, umount_log_level = LOG_INFO;
-        static const char* const dirs[] = {SYSTEM_SHUTDOWN_PATH, NULL};
+        static const char* const dirs[] = {SYSTEM_SHUTDOWN_PATH, "/etc/systemd/system-shutdown", NULL};
 
         /* The log target defaults to console, but the original systemd process will pass its log target in through a
          * command line argument, which will override this default. Also, ensure we'll never log to the journal or

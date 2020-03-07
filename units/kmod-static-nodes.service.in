@@ -12,7 +12,7 @@ Description=Create list of static device nodes for the current kernel
 DefaultDependencies=no
 Before=sysinit.target systemd-tmpfiles-setup-dev.service
 ConditionCapability=CAP_SYS_MODULE
-ConditionFileNotEmpty=/lib/modules/%v/modules.devname
+ConditionFileNotEmpty=/run/booted-system/kernel-modules/lib/modules/%v/modules.devname
 
 [Service]
 Type=oneshot

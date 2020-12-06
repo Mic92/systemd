@@ -11,7 +11,7 @@
 # considered deprecated (though there is no plan to remove them). New names
 # shall have underscores.
 
-prefix=/usr
+prefix=@prefix@
 root_prefix=@rootprefix_noslash@
 rootprefix=${root_prefix}
 sysconf_dir=@sysconfdir@

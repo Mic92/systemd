@@ -2888,7 +2888,7 @@ static int acquire_credentials(
                                         lc->path,
                                         lc->encrypted,
                                         unit,
-                                        -1,
+                                        AT_FDCWD,
                                         dfd,
                                         uid,
                                         ownership_ok,

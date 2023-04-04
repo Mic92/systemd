@@ -2823,12 +2823,12 @@ static int load_cred_recurse_dir_cb(
         if (!credential_name_valid(sub_id))
                 return log_debug_errno(SYNTHETIC_ERRNO(EINVAL), "Credential would get ID %s, which is not valid, refusing", sub_id);
 
-        if (faccessat(args->dfd, sub_id, F_OK, AT_SYMLINK_NOFOLLOW) >= 0) {
-                log_debug("Skipping credential with duplicated ID %s at %s", sub_id, path);
-                return RECURSE_DIR_CONTINUE;
-        }
-        if (errno != ENOENT)
-                return log_debug_errno(errno, "Failed to test if credential %s exists: %m", sub_id);
+        //if (faccessat(args->dfd, sub_id, F_OK, AT_SYMLINK_NOFOLLOW) >= 0) {
+        //        log_debug("Skipping credential with duplicated ID %s at %s", sub_id, path);
+        //        return RECURSE_DIR_CONTINUE;
+        //}
+        //if (errno != ENOENT)
+        //        return log_debug_errno(errno, "Failed to test if credential %s exists: %m", sub_id);
 
         r = load_credential(
                         args->context,
@@ -2934,10 +2934,10 @@ static int acquire_credentials(
                  * EEXIST if the credential already exists. That's because the TPM2-based decryption is kinda
                  * slow and involved, hence it's nice to be able to skip that if the credential already
                  * exists anyway. */
-                if (faccessat(dfd, sc->id, F_OK, AT_SYMLINK_NOFOLLOW) >= 0)
-                        continue;
-                if (errno != ENOENT)
-                        return log_debug_errno(errno, "Failed to test if credential %s exists: %m", sc->id);
+                //if (faccessat(dfd, sc->id, F_OK, AT_SYMLINK_NOFOLLOW) >= 0)
+                //        continue;
+                //if (errno != ENOENT)
+                //        return log_debug_errno(errno, "Failed to test if credential %s exists: %m", sc->id);
 
                 if (sc->encrypted) {
                         r = decrypt_credential_and_warn(sc->id, now(CLOCK_REALTIME), NULL, NULL, sc->data, sc->size, &plaintext, &size);
